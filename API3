@@ -1,0 +1,119 @@
+local url = "https://nxty.lol/Trackstat/?API_KEY="..getgenv().Config["API_KEY"]
+local RunService = game:GetService("RunService")
+task.wait(30)
+print('Trackstat success load!✅')
+local function executeEvery30Seconds()
+    while true do
+        local Buckses = 0
+        local Age_Pots = 0
+        local Tiny_Pots = 0
+        local Event_Coins = 0
+        local request = http_request or request or HttpPost or syn.request
+        local clientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+        local playerData = clientData.get_data()[tostring(game.Players.LocalPlayer)]
+        pcall(function()
+            for num, i in pairs(playerData) do
+                if tostring(num) == 'money' then
+                        Buckses = i
+                elseif tostring(num) == 'stars_2025' then
+                        Event_Coins = i
+                elseif tostring(num) == 'inventory' then
+                        for num2,i2 in pairs(i.food) do
+                            if i2.kind == 'tiny_pet_age_potion' then
+                                Tiny_Pots += 1
+                            elseif i2.kind == 'pet_age_potion' then
+                                Age_Pots += 1
+                            end
+                        end
+                end
+            end
+        end)
+        print(Buckses)
+        print(Age_Pots)
+        local data = {API_KEY=getgenv().Config["API_KEY"], Buckses=Buckses, Age_Potions=Age_Pots, Tiny_Potions=Tiny_Pots, Event_coins=Event_Coins, Nickname=game.Players.LocalPlayer.Name, datetime=os.date("!%Y-%m-%d %H:%M:%S")}
+        local JSON_data = game:GetService("HttpService"):JSONEncode(data)
+        local headers = {
+            ["content-type"] = "application/json"
+        }
+        local payload = {
+            Url = url,
+            Body = JSON_data,
+            Method = "POST",
+            Headers=headers
+        }
+        request(payload)
+        task.wait(30)
+    end
+end
+spawn(executeEvery30Seconds)
+
+while true do
+    local request = http_request or request or HttpPost or syn.request
+    local new_Buckses = 0
+    local new_Age_Pots = 0
+    local new_Tiny_Pots = 0
+    local new_Event_Coins = 0
+    task.wait(3)
+    local clientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+    local playerData = clientData.get_data()[tostring(game.Players.LocalPlayer)]
+    pcall(function()
+        for num, i in pairs(playerData) do
+            if tostring(num) == 'money' then
+                    new_Buckses = i
+            elseif tostring(num) == 'stars_2025' then
+                    new_Event_Coins = i
+            elseif tostring(num) == 'inventory' then
+                for num2,i2 in pairs(i.food) do
+                    if i2.kind == 'tiny_pet_age_potion' then
+                        new_Tiny_Pots += 1
+                    elseif i2.kind == 'pet_age_potion' then
+                        new_Age_Pots += 1
+                    end
+                end
+            end
+        end
+    end)
+    task.wait(3600)
+    local last_hour_Buckses = 0
+    local last_hour_Age_Pots = 0
+    local last_hour_Tiny_Pots = 0
+    local last_hour_Event_Coins = 0
+    task.wait(3)
+    pcall(function()
+        for num, i in pairs(playerData) do
+            if tostring(num) == 'money' then
+                last_hour_Buckses = i
+            elseif tostring(num) == 'stars_2025' then
+                last_hour_Event_Coins = i
+            elseif tostring(num) == 'inventory' then
+                for num2,i2 in pairs(i.food) do
+                    if i2.kind == 'tiny_pet_age_potion' then
+                        last_hour_Tiny_Pots += 1
+                    elseif i2.kind == 'pet_age_potion' then
+                        last_hour_Age_Pots += 1
+                    end
+                end
+            end
+        end
+    end)
+     local Result_hour_Buckses = tonumber(last_hour_Buckses)-tonumber(new_Buckses)
+     local Result_hour_Age_Pots = tonumber(last_hour_Age_Pots)-tonumber(new_Age_Pots)
+     local Result_hour_Tiny_Pots = tonumber(last_hour_Tiny_Pots)-tonumber(new_Tiny_Pots)
+     local Result_hour_Event_Coins = tonumber(last_hour_Event_Coins)-tonumber(new_Event_Coins)
+     print(Result_hour_Buckses)
+     print(Result_hour_Age_Pots)
+     print(Result_hour_Tiny_Pots)
+     print(Result_hour_Event_Coins)
+     local hourly_data = {Last_hour_buckses=Result_hour_Buckses, Last_Hour_AgePots=Result_hour_Age_Pots, Last_Hour_TinyPots=Result_hour_Tiny_Pots, Last_Hour_EventCoins=Result_hour_Event_Coins, Nickname=game.Players.LocalPlayer.Name, last_update_hourly_data=os.date("!%Y-%m-%d %H:%M:%S")}
+     local hourly_JSON_data = game:GetService("HttpService"):JSONEncode(hourly_data)
+     local hourly_headers = {
+         ["content-type"] = "application/json"
+     }
+     local hourly_payload = {
+         Url = url,
+         Body = hourly_JSON_data,
+         Method = "POST",
+         Headers=hourly_headers
+     }
+     request(hourly_payload)
+end
